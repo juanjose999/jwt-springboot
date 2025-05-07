@@ -1,5 +1,6 @@
 package com.pdfs.myuser;
 
+import com.pdfs.jwt.Jwt;
 import com.pdfs.roles.Roles;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,10 @@ public class MyUser implements UserDetails {
     private String password;
     private String email;
     private String dateCreated = LocalDate.now().toString();
+
+    @OneToMany(mappedBy = "user")
+    private Set<Jwt> jwt;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_rol",
@@ -98,5 +104,14 @@ public class MyUser implements UserDetails {
     public void setRoles(Roles rol) {
         if(this.roles == null) this.roles = new HashSet<>();
         this.roles.add(rol);
+    }
+
+    public void setJwt(Jwt jwt) {
+        if(this.jwt == null) this.jwt = new HashSet<>();
+        this.jwt.add(jwt);
+    }
+
+    public Set<Jwt> getJwt() {
+        return jwt;
     }
 }

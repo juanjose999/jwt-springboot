@@ -1,5 +1,7 @@
 package com.pdfs.myuser;
 
+import com.pdfs.jwt.Jwt;
+import com.pdfs.jwt.JwtRepository;
 import com.pdfs.jwt.JwtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,11 +20,13 @@ public class MyUserController {
     private final MyUserService myUserService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final JwtRepository jwtRepository;
 
-    public MyUserController(final MyUserService myUserService, AuthenticationManager authenticationManager, JwtService jwtService) {
+    public MyUserController(final MyUserService myUserService, AuthenticationManager authenticationManager, JwtService jwtService, JwtRepository jwtRepository) {
         this.myUserService = myUserService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.jwtRepository = jwtRepository;
     }
 
     @PostMapping("/singup")
@@ -47,6 +51,8 @@ public class MyUserController {
         );
         if(!authenticacion.isAuthenticated()) throw new Exception("Invalid credentials.");
         String token = jwtService.generateJwt(myUser.getEmail());
+        Jwt jwt = new Jwt(token);
+        jwtRepository.save(jwt);
         Map<String, String> response = new HashMap<>();
         response.put("token", token);
         return ResponseEntity.ok(response);
