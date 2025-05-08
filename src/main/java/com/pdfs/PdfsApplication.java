@@ -1,9 +1,9 @@
 package com.pdfs;
 
-import com.pdfs.myuser.MyUser;
-import com.pdfs.myuser.MyUserRepository;
-import com.pdfs.roles.Roles;
-import com.pdfs.roles.RolesRepository;
+import com.pdfs.myuser.entity.MyUser;
+import com.pdfs.myuser.repository.MyUserRepository;
+import com.pdfs.roles.entity.Roles;
+import com.pdfs.roles.repository.RolesRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;

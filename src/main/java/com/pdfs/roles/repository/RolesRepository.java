@@ -1,5 +1,6 @@
-package com.pdfs.roles;
+package com.pdfs.roles.repository;
 
+import com.pdfs.roles.entity.Roles;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,9 +1,7 @@
-package com.pdfs.jwt;
+package com.pdfs.jwt.entity;
 
-import com.pdfs.myuser.MyUser;
+import com.pdfs.myuser.entity.MyUser;
 import jakarta.persistence.*;
-
-import java.time.Instant;
 
 @Entity
 public class Jwt {
@@ -12,7 +10,7 @@ public class Jwt {
     private Long id;
     @Column(columnDefinition = "TEXT")
     private String token;
-    private boolean isActive;
+    private boolean active;
     @ManyToOne
     private MyUser user;
 
@@ -20,7 +18,13 @@ public class Jwt {
 
     public Jwt(String token) {
         this.token = token;
-        this.isActive = true;
+        this.active = true;
+    }
+
+    public Jwt(String token, MyUser user) {
+        this.token = token;
+        this.user = user;
+        this.active = true;
     }
 
     public Long getId() {
@@ -39,12 +43,19 @@ public class Jwt {
         this.token = token;
     }
 
-    public boolean isActive() {
-        return isActive;
+    public boolean active() {
+        return active;
     }
 
     public void setActive(boolean active) {
-        isActive = active;
+        this.active = active;
     }
 
+    public MyUser getUser() {
+        return user;
+    }
+
+    public void setUser(MyUser user) {
+        this.user = user;
+    }
 }

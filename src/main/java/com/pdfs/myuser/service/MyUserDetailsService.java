@@ -1,6 +1,7 @@
-package com.pdfs.myuser;
+package com.pdfs.myuser.service;
 
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import com.pdfs.myuser.repository.MyUserRepository;
+import com.pdfs.myuser.entity.MyUser;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

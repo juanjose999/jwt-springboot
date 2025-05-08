@@ -1,4 +1,4 @@
-package com.pdfs.roles;
+package com.pdfs.roles.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

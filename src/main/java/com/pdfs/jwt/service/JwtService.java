@@ -1,31 +1,32 @@
-package com.pdfs.jwt;
+package com.pdfs.jwt.service;
 
+import com.pdfs.jwt.entity.Jwt;
+import com.pdfs.jwt.repository.JwtRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class JwtService {
 
-    private final Long EXPIRATION_TIME = TimeUnit.MINUTES.toSeconds(10);
+    private final Long EXPIRATION_TIME_ACCESS = TimeUnit.MINUTES.toSeconds(10);
+    private final Long EXPIRATION_TIME_REFRESH = TimeUnit.DAYS.toSeconds(16);
+    private final JwtRepository jwtRepository;
 
-    //firma simetrica
-    //private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    public JwtService(JwtRepository jwtRepository) {
+        this.jwtRepository = jwtRepository;
+    }
 
-    //firma asimetrica
     public static KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256);
 
     static {
@@ -71,14 +72,23 @@ public class JwtService {
         return sb.toString();
     }
 
-    public String generateJwt(String email){
+    private String generateJwt(String email, Long expirationTime, String ipUser) {
         return Jwts.builder()
+                .setClaims(Map.of("ipUser",ipUser))
                 .setSubject(email)
                 .setId(UUID.randomUUID().toString())
                 .setIssuedAt(Date.from(Instant.now()))
-                .setExpiration(Date.from(Instant.now().plusSeconds(EXPIRATION_TIME)))
+                .setExpiration(Date.from(Instant.now().plusSeconds(expirationTime)))
                 .signWith(keyPair.getPrivate())
                 .compact();
+    }
+
+    public String generateJwtAccessToken(String email, String ipUser) {
+        return generateJwt(email, EXPIRATION_TIME_ACCESS, ipUser);
+    }
+
+    public String generateJwtRefreshToken(String email, String ipUser) {
+        return generateJwt(email, EXPIRATION_TIME_REFRESH, ipUser);
     }
 
     private Claims getClaims(String jwt){
@@ -89,14 +99,31 @@ public class JwtService {
                 .getBody();
     }
 
+    public  String getJit(String jwt){
+        return getClaims(jwt).getId();
+    }
+
     public String getEmailFromJwt(String jwt){
-        String email = getClaims(jwt).getSubject();
-        return email;
+        return getClaims(jwt).getSubject();
     }
 
     public boolean validateJwt(String jwt){
-        return getClaims(jwt).getExpiration().after(new Date())
-                && getClaims(jwt).getIssuedAt().before(new Date());
+        return  validExpiration(jwt);
     }
 
+    public boolean validateJwtRefresh(String jwt){
+        return tokenExists(jwt) && jwtIsActive(jwt);
+    }
+
+    private boolean validExpiration(String jwt){
+        return getClaims(jwt).getExpiration().after(new Date());
+    }
+
+    private boolean jwtIsActive(String jwt){
+        return jwtRepository.findByToken(jwt).get().active();
+    }
+
+    public boolean tokenExists(String jwt){
+        return jwtRepository.findByToken(jwt).isEmpty();
+    }
 }

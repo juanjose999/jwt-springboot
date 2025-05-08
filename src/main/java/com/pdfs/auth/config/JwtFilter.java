@@ -1,8 +1,9 @@
-package com.pdfs;
+package com.pdfs.auth.config;
 
-import com.pdfs.jwt.JwtService;
-import com.pdfs.myuser.MyUser;
-import com.pdfs.myuser.MyUserRepository;
+import com.pdfs.auth.service.ControlAccessToken;
+import com.pdfs.jwt.service.JwtService;
+import com.pdfs.myuser.entity.MyUser;
+import com.pdfs.myuser.repository.MyUserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,10 +31,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if(request.getRequestURI().startsWith("/login")) {
+        if(request.getRequestURI().startsWith("/login") || request.getRequestURI().startsWith("/signup")) {
             filterChain.doFilter(request, response);
             return;
         }
+
         String authorization = request.getHeader("Authorization");
         if(authorization == null || !authorization.startsWith("Bearer ")) throw new JwtException("Authorization header is invalid");
         String token = authorization.substring(7);
@@ -43,6 +45,9 @@ public class JwtFilter extends OncePerRequestFilter {
         Optional<MyUser> findUserByEmail = applicationContext.getBean(MyUserRepository.class).findByEmail(email);
         if(findUserByEmail.isEmpty()) throw new JwtException("User not found");
         MyUser myUser = findUserByEmail.get();
+
+        if(!ControlAccessToken.existUser(myUser.getEmail())) throw new JwtException("Invalid user");
+
         if(!jwtService.validateJwt(token) && SecurityContextHolder.getContext().getAuthentication() != null){
             throw new JwtException("Invalid token");
         }
