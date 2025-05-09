@@ -8,9 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -20,6 +18,7 @@ public class MyUser implements UserDetails {
     private Long id;
     private String username;
     private String password;
+    @Column(unique = true)
     private String email;
     private String dateCreated = LocalDate.now().toString();
 
@@ -44,10 +43,17 @@ public class MyUser implements UserDetails {
         this.roles = new HashSet<>();
     }
 
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream().map(rol -> new SimpleGrantedAuthority(rol.getName()))
-                .collect(Collectors.toList());
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        for(Roles rol : this.roles) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_"+rol.getName()));
+            authorities.addAll(rol.getPermissions().stream()
+                    .map(permissions -> new SimpleGrantedAuthority(permissions.getName()))
+                    .collect(Collectors.toSet()));
+        }
+        return authorities;
     }
 
     @Override

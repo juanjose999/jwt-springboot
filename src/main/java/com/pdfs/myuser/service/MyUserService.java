@@ -26,9 +26,18 @@ public class MyUserService {
 
     public MyUser saveUser(MyUserRequestDto userRequestDto) {
         MyUser myUser = MyUserMapper.myUserRequestDtoToMyUser(userRequestDto);
-        Optional<Roles> findRoleUser = rolesRepository.findByName("ROLE_USER");
-        if(findRoleUser.isEmpty()) throw new RuntimeException("Role USE not found.");
+        Optional<Roles> findRoleUser = rolesRepository.findByName("USER");
+        if(findRoleUser.isEmpty()) throw new RuntimeException("Role user not found.");
         myUser.setRoles(findRoleUser.get());
+        myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
+        return myUserRepository.save(myUser);
+    }
+
+    public MyUser createAdmin(MyUserRequestDto userRequestDto) {
+        MyUser myUser = MyUserMapper.myUserRequestDtoToMyUser(userRequestDto);
+        Optional<Roles> findRoleAdmin = rolesRepository.findByName("ADMIN");
+        if(findRoleAdmin.isEmpty()) throw new RuntimeException("Role admin not found.");
+        myUser.setRoles(findRoleAdmin.get());
         myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
         return myUserRepository.save(myUser);
     }

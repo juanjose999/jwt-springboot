@@ -11,8 +11,11 @@ import com.pdfs.myuser.entity.dto.MyUserRequestDto;
 import com.pdfs.myuser.repository.MyUserRepository;
 import com.pdfs.myuser.service.MyUserDetailsService;
 import com.pdfs.myuser.service.MyUserService;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
